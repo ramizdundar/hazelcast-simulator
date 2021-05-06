@@ -48,7 +48,6 @@ import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public abstract class BenchmarkBase {
-    public static final String PROPS_FILENAME = "nexmark-jet.properties";
     public static final String PROP_EVENTS_PER_SECOND = "events-per-second";
     public static final String PROP_NUM_DISTINCT_KEYS = "num-distinct-keys";
     public static final String PROP_WINDOW_SIZE_MILLIS = "window-size-millis";
@@ -72,9 +71,8 @@ public abstract class BenchmarkBase {
     }
 
     @SuppressWarnings("checkstyle:methodlength")
-    public Job run(HazelcastInstance instance) {
+    public Job run(HazelcastInstance instance, Properties props) {
         String benchmarkName = getClass().getSimpleName();
-        Properties props = loadProps();
         JobConfig jobCfg = new JobConfig();
         jobCfg.setName(benchmarkName);
         jobCfg.registerSerializer(Auction.class, Auction.AuctionSerializer.class);
@@ -134,9 +132,7 @@ public abstract class BenchmarkBase {
 
             jobCfg.setProcessingGuarantee(guarantee);
             jobCfg.setSnapshotIntervalMillis(snapshotInterval);
-            Job job = jet.newJobIfAbsent(pipeline, jobCfg);
-            Runtime.getRuntime().addShutdownHook(new Thread(job::cancel));
-            return job;
+            return jet.newJobIfAbsent(pipeline, jobCfg);
         } catch (ValidationException e) {
             System.err.println(e.getMessage());
         }
@@ -146,20 +142,6 @@ public abstract class BenchmarkBase {
     abstract StreamStage<Tuple2<Long, Long>> addComputation(
             Pipeline pipeline, Properties props
     ) throws ValidationException;
-
-    static Properties loadProps() {
-        Properties props = new Properties();
-        try {
-            props.load(new FileInputStream(PROPS_FILENAME));
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + e.getMessage());
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Can't read file " + PROPS_FILENAME);
-            System.exit(2);
-        }
-        return props;
-    }
 
     public static String ensureProp(Properties props, String propName) throws ValidationException {
         String prop = props.getProperty(propName);
