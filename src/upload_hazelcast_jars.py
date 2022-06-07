@@ -52,7 +52,7 @@ def artifact_ids(enterprise, version):
             return ['hazelcast-all']
     elif version.startswith("5"):
         if enterprise:
-            return ['hazelcast-enterprise', 'hazelcast-sql', 'hazelcast-spring']
+            return ['hazelcast-enterprise', 'hazelcast-spring']
         else:
             return ['hazelcast', 'hazelcast-sql', 'hazelcast-spring']
     else:
