@@ -126,13 +126,13 @@ public class UniDirectionalLondon extends HazelcastTest {
 
         byte[][] values = generateValues(random);
         for (int key : keys) {
-            syncMap.putAsync(key, values[random.nextInt(values.length)]);
+            syncMap.setAsync(key, values[random.nextInt(values.length)]);
         }
 
         int size;
         while ((size = syncMap.size()) < keyCount) {
             Thread.sleep(sleepMillis);
-            logger.info("-- " + size);
+            logger.info("-+- " + size);
         }
     }
 }
