@@ -94,7 +94,6 @@ public class UniDirectionalTokyo extends HazelcastTest {
     @Teardown(global = true)
     public void tearDown() throws ExecutionException, InterruptedException {
         syncMap.destroy();
-        replyMap.put(0, 0);
         replyThatSyncFinished();
     }
 
@@ -115,6 +114,7 @@ public class UniDirectionalTokyo extends HazelcastTest {
     }
 
     private void replyThatSyncFinished() throws ExecutionException, InterruptedException {
+        replyMap.put(0, 0);
         HazelcastClientInstanceImpl client = ((HazelcastClientProxy) targetInstance).client;
         ClientMessage request = MCWanSyncMapCodec.encodeRequest(wanReplicationName, wanPublisherId, 1, replyMapName);
         ClientInvocationFuture response = new ClientInvocation(client, request, "some-name", -1).invoke();
