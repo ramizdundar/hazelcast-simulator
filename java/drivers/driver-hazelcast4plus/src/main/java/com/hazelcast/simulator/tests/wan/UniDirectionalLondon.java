@@ -62,7 +62,7 @@ public class UniDirectionalLondon extends HazelcastTest {
     public void prepare() throws ExecutionException, InterruptedException {
         pauseReplication();
 
-        populateSyncedMap();
+        populateSyncedMapV2();
 
         startWanSync();
     }
@@ -99,19 +99,40 @@ public class UniDirectionalLondon extends HazelcastTest {
         response.get();
     }
 
-    private void populateSyncedMap() {
-        Random random = new Random();
+    private byte[][] generateValues(Random random) {
         byte[][] values = new byte[valueCount][];
         for (int i = 0; i < values.length; i++) {
             int delta = maxSize - minSize;
             int length = delta == 0 ? minSize : minSize + random.nextInt(delta);
             values[i] = generateByteArray(random, length);
         }
+        return values;
+    }
+
+    private void populateSyncedMap() {
+        Random random = new Random();
+
+        byte[][] values = generateValues(random);
 
         Streamer<Integer, Object> streamer = StreamerFactory.getInstance(syncMap);
         for (int key : keys) {
             streamer.pushEntry(key, values[random.nextInt(values.length)]);
         }
         streamer.await();
+    }
+
+    private void populateSyncedMapV2() throws InterruptedException {
+        Random random = new Random();
+
+        byte[][] values = generateValues(random);
+        for (int key : keys) {
+            syncMap.putAsync(key, values[random.nextInt(values.length)]);
+        }
+
+        int size;
+        while ((size = syncMap.size()) < keyCount) {
+            Thread.sleep(sleepMillis);
+            logger.info("-- " + size);
+        }
     }
 }
