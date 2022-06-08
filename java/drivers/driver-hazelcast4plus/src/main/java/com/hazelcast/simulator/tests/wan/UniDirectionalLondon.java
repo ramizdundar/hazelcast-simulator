@@ -33,6 +33,7 @@ public class UniDirectionalLondon extends HazelcastTest {
     public String wanPublisherId = "to-tokyo-publisher-id";
     public String syncMapName = "from-london-sync-map";
     public String replyMapName = "from-tokyo-reply-map";
+    public int populationConcurrency = 16;
 
 
     // IntByteMapTest
@@ -125,8 +126,16 @@ public class UniDirectionalLondon extends HazelcastTest {
         Random random = new Random();
 
         byte[][] values = generateValues(random);
-        for (int key : keys) {
-            syncMap.setAsync(key, values[random.nextInt(values.length)]);
+
+        for (int i = 0; i < populationConcurrency; i++) {
+            int finalI = i;
+            Thread t = new Thread(() -> {
+                int load = maxSize / populationConcurrency;
+                for (int j = finalI * load; j < (finalI + 1) * load; j++) {
+                    syncMap.setAsync(keys[j], values[random.nextInt(values.length)]);
+                }
+            });
+            t.start();
         }
 
         int size;
