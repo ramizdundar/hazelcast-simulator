@@ -130,8 +130,8 @@ public class UniDirectionalLondon extends HazelcastTest {
         for (int i = 0; i < populationConcurrency; i++) {
             int finalI = i;
             Thread t = new Thread(() -> {
-                int load = maxSize / populationConcurrency;
-                for (int j = finalI * load; j < (finalI + 1) * load; j++) {
+                int loadPerMember = keyCount / populationConcurrency;
+                for (int j = finalI * loadPerMember; j < (finalI + 1) * loadPerMember; j++) {
                     syncMap.setAsync(keys[j], values[random.nextInt(values.length)]);
                 }
             });
