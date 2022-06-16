@@ -59,6 +59,7 @@ public class UniDirectionalTokyo extends HazelcastTest {
         int staleFor = 0;
         while (state.running) {
             int size = syncMap.size();
+            logger.info("++ size: " + size);
             if (size > 0) {
                 if (startMillis == -1)  startMillis = System.currentTimeMillis();
                 if (lastSize == size) staleFor++;
