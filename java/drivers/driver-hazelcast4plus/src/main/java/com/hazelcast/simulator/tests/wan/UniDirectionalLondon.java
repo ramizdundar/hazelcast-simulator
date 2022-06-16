@@ -34,6 +34,7 @@ public class UniDirectionalLondon extends HazelcastTest {
     public String syncMapName = "from-london-sync-map";
     public String replyMapName = "from-tokyo-reply-map";
     public int populationConcurrency = 4;
+    public int initialDelayInMillis = 0;
 
 
     // IntByteMapTest
@@ -65,7 +66,7 @@ public class UniDirectionalLondon extends HazelcastTest {
 
         populateSyncedMapV2();
 
-        startWanSync();
+        startWanSyncWithDelay();
     }
 
     @TimeStep(executionGroup = "sleep")
@@ -98,6 +99,11 @@ public class UniDirectionalLondon extends HazelcastTest {
         ClientMessage request = MCWanSyncMapCodec.encodeRequest(wanReplicationName, wanPublisherId, 1, syncMapName);
         ClientInvocationFuture response = new ClientInvocation(client, request, "some-name", -1).invoke();
         response.get();
+    }
+
+    private void startWanSyncWithDelay() throws ExecutionException, InterruptedException {
+        Thread.sleep(initialDelayInMillis);
+        startWanSync();
     }
 
     private byte[][] generateValues(Random random) {
